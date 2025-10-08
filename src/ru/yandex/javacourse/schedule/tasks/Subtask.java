@@ -5,6 +5,9 @@ public class Subtask extends Task {
 
 	public Subtask(int id, String name, String description, TaskStatus status, int epicId) {
 		super(id, name, description, status);
+        if (id == epicId) {
+            throw new IllegalArgumentException("Subtask cannot be attached to itself");
+        }
 		this.epicId = epicId;
 	}
 
