@@ -3,10 +3,7 @@ package ru.yandex.javacourse.schedule.manager;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.IN_PROGRESS;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
@@ -144,8 +141,10 @@ public class InMemoryTaskManager implements TaskManager {
 	@Override
 	public void deleteEpic(int id) {
 		final Epic epic = epics.remove(id);
+        historyManager.remove(id);
 		for (Integer subtaskId : epic.getSubtaskIds()) {
 			subtasks.remove(subtaskId);
+            historyManager.remove(subtaskId);
 		}
 	}
 
@@ -156,6 +155,7 @@ public class InMemoryTaskManager implements TaskManager {
 			return;
 		}
 		Epic epic = epics.get(subtask.getEpicId());
+        historyManager.remove(id);
 		epic.removeSubtask(id);
 		updateEpicStatus(epic.getId());
 	}
