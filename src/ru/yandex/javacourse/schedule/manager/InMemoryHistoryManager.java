@@ -1,7 +1,6 @@
 package ru.yandex.javacourse.schedule.manager;
 
 import ru.yandex.javacourse.schedule.tasks.Task;
-import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
