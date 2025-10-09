@@ -1,11 +1,14 @@
 package ru.yandex.javacourse.schedule.manager;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.tasks.Task;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static ru.yandex.javacourse.schedule.testdata.TestConstants.*;
+import static ru.yandex.javacourse.schedule.testdata.TestDataFactory.*;
 
 public class InMemoryHistoryManagerTest {
 
@@ -16,12 +19,11 @@ public class InMemoryHistoryManagerTest {
         historyManager = Managers.getDefaultHistory();
     }
 
-
     @Test
-    public void testHistoricVersionsByPointer() {
-        Task task = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
+    @DisplayName("История: при повторном добавлении той же задачи сохраняется только одна запись")
+    public void addTask_SameInstanceTwice_OnlyOneUpdatedEntryInHistory() {
+        Task task = newTask(TASK_NAME_1, TASK_DESC_1, TaskStatus.NEW);
         historyManager.addTask(task);
-
         assertEquals(task.getStatus(), historyManager.getHistory().get(0).getStatus(), "Task should be stored");
 
         task.setStatus(TaskStatus.IN_PROGRESS);
@@ -32,10 +34,10 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void testRemoveTaskFromHistory() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
-
+    @DisplayName("История: удаление задачи по id убирает её из истории и сохраняет остальные")
+    public void remove_TaskById_TaskRemovedFromHistory() {
+        Task task1 = newTaskWithId(1, TASK_NAME_1, TASK_DESC_1, TaskStatus.NEW);
+        Task task2 = newTaskWithId(2, TASK_NAME_2, TASK_DESC_2, TaskStatus.NEW);
         historyManager.addTask(task1);
         historyManager.addTask(task2);
 
@@ -48,10 +50,10 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void testAddTaskAfterRemoval() {
-        Task task1 = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task("Test 2", "Testing task 2", TaskStatus.NEW);
-
+    @DisplayName("История: можно добавить новую задачу после удаления предыдущей")
+    public void addTask_AfterRemoval_NewTaskAppearsAloneInHistory() {
+        Task task1 = newTask(TASK_NAME_1, TASK_DESC_1, TaskStatus.NEW);
+        Task task2 = newTask(TASK_NAME_2, TASK_DESC_2, TaskStatus.NEW);
         historyManager.addTask(task1);
         historyManager.remove(task1.getId());
 
@@ -62,10 +64,11 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void testHistoryOrder() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
-        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW);
+    @DisplayName("История: порядок задач соответствует порядку добавления")
+    public void getHistory_AddThreeTasks_OrderIsPreserved() {
+        Task task1 = newTaskWithId(1, TASK_NAME_1, TASK_DESC_1, TaskStatus.NEW);
+        Task task2 = newTaskWithId(2, TASK_NAME_2, TASK_DESC_2, TaskStatus.NEW);
+        Task task3 = newTaskWithId(3, TASK_NAME_3, TASK_DESC_3, TaskStatus.NEW);
 
         historyManager.addTask(task1);
         historyManager.addTask(task2);
