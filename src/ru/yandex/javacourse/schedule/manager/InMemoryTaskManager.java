@@ -12,9 +12,9 @@ import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
 public class InMemoryTaskManager implements TaskManager {
 
-	private final Map<Integer, Task> tasks = new HashMap<>();
-	private final Map<Integer, Epic> epics = new HashMap<>();
-	private final Map<Integer, Subtask> subtasks = new HashMap<>();
+	protected final Map<Integer, Task> tasks = new HashMap<>();
+    protected final Map<Integer, Epic> epics = new HashMap<>();
+    protected final Map<Integer, Subtask> subtasks = new HashMap<>();
 	private int generatorId = 0;
 	private final HistoryManager historyManager = Managers.getDefaultHistory();
 
@@ -24,7 +24,15 @@ public class InMemoryTaskManager implements TaskManager {
 		return new ArrayList<>(this.tasks.values());
 	}
 
-	@Override
+    public int getGeneratorId() {
+        return generatorId;
+    }
+
+    public void setGeneratorId(int generatorId) {
+        this.generatorId = generatorId;
+    }
+
+    @Override
 	public ArrayList<Subtask> getSubtasks() {
 		return new ArrayList<>(subtasks.values());
 	}
