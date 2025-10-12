@@ -84,13 +84,13 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public int addNewTask(Task task) {
-        if (hasIntersections(task)){
+        if (hasIntersections(task)) {
             throw new IllegalArgumentException("Task cannot be added because of intersections");
         }
 		final int id = ++generatorId;
 		task.setId(id);
 		tasks.put(id, task);
-        if (task.getStartTime() != null){
+        if (task.getStartTime() != null) {
             prioritizedTasks.add(task);
         }
 		return id;
@@ -98,7 +98,7 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public int addNewEpic(Epic epic) {
-        if (hasIntersections(epic)){
+        if (hasIntersections(epic)) {
             throw new IllegalArgumentException("Epic cannot be added because of intersections");
         }
 		final int id = ++generatorId;
@@ -113,7 +113,7 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public Integer addNewSubtask(Subtask subtask) {
-        if (hasIntersections(subtask)){
+        if (hasIntersections(subtask)) {
             throw new IllegalArgumentException("Subtask cannot be added because of intersections");
         }
 		final int epicId = subtask.getEpicId();
