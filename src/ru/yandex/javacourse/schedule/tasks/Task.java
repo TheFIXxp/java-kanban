@@ -1,5 +1,7 @@
 package ru.yandex.javacourse.schedule.tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -7,6 +9,8 @@ public class Task {
 	protected String name;
 	protected TaskStatus status;
 	protected String description;
+    protected Duration duration;
+    protected LocalDateTime startTime;
 
 	public Task(int id, String name, String description, TaskStatus status) {
 		this.id = id;
@@ -53,6 +57,13 @@ public class Task {
 		this.description = description;
 	}
 
+    public LocalDateTime getEndTime() {
+        if (startTime == null || duration == null) {
+            return null;
+        }
+        return startTime.plus(duration);
+    }
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
@@ -75,4 +86,28 @@ public class Task {
 				", description='" + description + '\'' +
 				'}';
 	}
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public boolean isIntersects(Task task) {
+        if (task == null || getStartTime() == null || getEndTime() == null || task.getStartTime() == null || task.getEndTime() == null) {
+            return false;
+        }
+        return getEndTime().isAfter(task.getStartTime()) && getStartTime().isBefore(task.getEndTime());
+    }
+
 }
