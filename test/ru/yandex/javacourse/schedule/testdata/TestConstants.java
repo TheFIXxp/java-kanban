@@ -1,5 +1,8 @@
 package ru.yandex.javacourse.schedule.testdata;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class TestConstants {
     public static final String TASK_NAME_1 = "Test 1";
     public static final String TASK_NAME_2 = "Test 2";
@@ -19,4 +22,10 @@ public class TestConstants {
     public static final String SUBTASK_DESC_1 = "Test subtask 1";
     public static final String SUBTASK_DESC_2 = "Test subtask 2";
     public static final String SUBTASK_DESC_3 = "Test subtask 3";
+
+    public static final LocalDateTime TASK_START_TIME_1 = LocalDateTime.of(2025, 9, 1, 10, 0);
+    public static final LocalDateTime TASK_START_TIME_2 = LocalDateTime.of(2025, 9, 1, 12, 0);
+
+    public static final Duration TASK_DURATION_1 = Duration.ofHours(2);
+    public static final Duration TASK_DURATION_2 = Duration.ofHours(1);
 }

@@ -12,15 +12,19 @@ import static org.junit.jupiter.api.Assertions.*;
 import static ru.yandex.javacourse.schedule.testdata.TestConstants.*;
 import static ru.yandex.javacourse.schedule.testdata.TestDataFactory.*;
 
-public class FileBackedTaskManagerTest {
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
     private File tempFile;
-    private FileBackedTaskManager manager;
 
-    @BeforeEach
-    public void initManager() throws IOException {
-        tempFile = File.createTempFile("test_tasks", ".csv");
-        manager = new FileBackedTaskManager(tempFile);
+    @Override
+    public FileBackedTaskManager createManager() {
+        try {
+            tempFile = File.createTempFile("test_tasks", ".csv");
+        } catch (RuntimeException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return new FileBackedTaskManager(tempFile);
     }
 
     @Test
@@ -183,4 +187,76 @@ public class FileBackedTaskManagerTest {
         assertEquals(1, loadedEpic.getSubtaskIds().size(), "Epic should have 1 subtask after deletion");
         assertFalse(loadedEpic.getSubtaskIds().contains(sub1.getId()), "Deleted subtask ID should not be present in epic");
     }
+
+    @Test
+    @DisplayName("Задачи: сохранение и загрузка задачи с временем начала и продолжительностью")
+    public void saveAndLoad_TaskWithTime_RecordsTimeCorrectly() {
+        Task task = newTask(TASK_NAME_1, TASK_DESC_1, TaskStatus.NEW);
+        task.setStartTime(TASK_START_TIME_1);
+        task.setDuration(TASK_DURATION_1);
+        manager.addNewTask(task);
+
+        FileBackedTaskManager loaded = FileBackedTaskManager.loadFromFile(tempFile);
+        List<Task> loadedTasks = loaded.getTasks();
+
+        assertEquals(1, loadedTasks.size());
+        Task loadedTask = loadedTasks.get(0);
+
+        assertEquals(TASK_START_TIME_1, loadedTask.getStartTime());
+        assertEquals(TASK_DURATION_1, loadedTask.getDuration());
+    }
+
+    @Test
+    @DisplayName("Задачи: сохранение и загрузка задачи без времени начала и продолжительности")
+    public void saveAndLoad_TaskWithoutTime_RecordsNullTime() {
+        Task task = newTask(TASK_NAME_1, TASK_DESC_1, TaskStatus.NEW);
+
+        manager.addNewTask(task);
+
+        FileBackedTaskManager loaded = FileBackedTaskManager.loadFromFile(tempFile);
+        List<Task> loadedTasks = loaded.getTasks();
+
+        assertEquals(1, loadedTasks.size());
+        Task loadedTask = loadedTasks.get(0);
+
+        assertNull(loadedTask.getStartTime());
+        assertNull(loadedTask.getDuration());
+    }
+
+    @Test
+    @DisplayName("Эпики и подзадачи: сохранение и загрузка эпика с подзадачами, содержащими время начала и продолжительность")
+    public void saveAndLoad_EpicWithSubtasks_RecordsTimeCorrectly() {
+        Epic epic = newEpicWithId(1, EPIC_NAME_1, EPIC_DESC_1);
+        manager.addNewEpic(epic);
+
+        Subtask subtask1 = newSubtaskWithId(2, SUBTASK_NAME_1, SUBTASK_DESC_1, TaskStatus.NEW, epic.getId());
+        subtask1.setStartTime(TASK_START_TIME_1);
+        subtask1.setDuration(TASK_DURATION_1);
+
+        Subtask subtask2 = newSubtaskWithId(3, SUBTASK_NAME_2, SUBTASK_DESC_2, TaskStatus.IN_PROGRESS, epic.getId());
+        subtask2.setStartTime(TASK_START_TIME_2);
+        subtask2.setDuration(TASK_DURATION_2);
+
+        manager.addNewSubtask(subtask1);
+        manager.addNewSubtask(subtask2);
+
+        FileBackedTaskManager loaded = FileBackedTaskManager.loadFromFile(tempFile);
+
+        List<Epic> loadedEpics = loaded.getEpics();
+        List<Subtask> loadedSubtasks = loaded.getSubtasks();
+
+        assertEquals(1, loadedEpics.size());
+        assertEquals(2, loadedSubtasks.size());
+
+        Epic loadedEpic = loadedEpics.get(0);
+        assertEquals(TASK_START_TIME_1, loadedSubtasks.get(0).getStartTime());
+        assertEquals(TASK_DURATION_1, loadedSubtasks.get(0).getDuration());
+        assertEquals(TASK_START_TIME_2, loadedSubtasks.get(1).getStartTime());
+        assertEquals(TASK_DURATION_2, loadedSubtasks.get(1).getDuration());
+
+        assertEquals(TASK_START_TIME_1, loadedEpic.getStartTime());
+        assertEquals(subtask2.getEndTime(), loadedEpic.getEndTime());
+    }
+
+
 }
