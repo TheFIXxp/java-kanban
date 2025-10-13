@@ -51,9 +51,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         }
                     }
                 }
-                if (task.getStartTime() != null) {
-                    manager.prioritizedTasks.add(task);
-                }
+                manager.addToPrioritized(task);
 
                 if (task.getId() > manager.getGeneratorId()) {
                     manager.setGeneratorId(task.getId());
