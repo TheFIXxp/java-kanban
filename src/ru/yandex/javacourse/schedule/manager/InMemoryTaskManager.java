@@ -307,7 +307,7 @@ public class InMemoryTaskManager implements TaskManager {
     private void removeFromPrioritized(Task task) {
         removeFromPrioritizedById(task.getId());
     }
-    
+
     private void removeFromPrioritizedById(int id) {
         prioritizedTasks.removeIf(t -> t.getId() == id);
     }
