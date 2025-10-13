@@ -7,6 +7,7 @@ import ru.yandex.javacourse.schedule.tasks.Task;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.yandex.javacourse.schedule.testdata.TestConstants.*;
 import static ru.yandex.javacourse.schedule.testdata.TestDataFactory.*;
 
@@ -17,6 +18,12 @@ public class InMemoryHistoryManagerTest {
     @BeforeEach
     public void initHistoryManager() {
         historyManager = Managers.getDefaultHistory();
+    }
+
+    @Test
+    @DisplayName("История: проверка пустой истории")
+    public void historyManager_EmptyHistory() {
+        assertTrue(historyManager.getHistory().isEmpty(), "History should be empty initially");
     }
 
     @Test
