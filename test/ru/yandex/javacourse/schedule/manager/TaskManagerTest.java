@@ -353,4 +353,102 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(TaskStatus.IN_PROGRESS, updatedEpic.getStatus());
     }
 
+    @Test
+    @DisplayName("Приоритет: задача корректно пересортировывается после изменения startTime")
+    public void updateTask_StartTimeChanged_ReordersPrioritizedTasks() {
+        Task task1 = newTask(TASK_NAME_1, TASK_DESC_1, TaskStatus.NEW);
+        Task task2 = newTask(TASK_NAME_2, TASK_DESC_2, TaskStatus.NEW);
+
+        task1.setStartTime(TASK_START_TIME_1);
+        task2.setStartTime(TASK_START_TIME_2);
+
+        manager.addNewTask(task1);
+        manager.addNewTask(task2);
+
+        List<Task> before = manager.getPrioritizedTasks();
+        assertEquals(List.of(task1, task2), before);
+
+        task1.setStartTime(TASK_START_TIME_2.plusHours(2));
+        manager.updateTask(task1);
+
+        List<Task> after = manager.getPrioritizedTasks();
+        assertEquals(List.of(task2, task1), after);
+    }
+
+    @Test
+    @DisplayName("Приоритет: изменение времени подзадачи обновляет время эпика и порядок задач")
+    public void updateSubtask_StartTimeChanged_UpdatesEpicTimeAndPriorities() {
+        Epic epic = newEpicWithId(1, EPIC_NAME_1, EPIC_DESC_1);
+        manager.addNewEpic(epic);
+
+        Subtask sub1 = newSubtaskWithId(2, SUBTASK_NAME_1, SUBTASK_DESC_1, TaskStatus.NEW, epic.getId());
+        Subtask sub2 = newSubtaskWithId(3, SUBTASK_NAME_2, SUBTASK_DESC_2, TaskStatus.NEW, epic.getId());
+
+        sub1.setStartTime(TASK_START_TIME_1);
+        sub1.setDuration(TASK_DURATION_1);
+        sub2.setStartTime(TASK_START_TIME_2);
+        sub2.setDuration(TASK_DURATION_2);
+
+        manager.addNewSubtask(sub1);
+        manager.addNewSubtask(sub2);
+
+        var epicStartBefore = epic.getStartTime();
+        var epicEndBefore = epic.getEndTime();
+
+        sub1.setStartTime(TASK_START_TIME_2.plusHours(3));
+        manager.updateSubtask(sub1);
+
+        Epic updatedEpic = manager.getEpic(epic.getId());
+        assertNotEquals(epicStartBefore, updatedEpic.getStartTime());
+        assertNotEquals(epicEndBefore, updatedEpic.getEndTime());
+
+        List<Task> prioritized = manager.getPrioritizedTasks();
+        assertEquals(List.of(updatedEpic,sub2, sub1), prioritized);
+    }
+
+    @Test
+    @DisplayName("Приоритет: эпики пересортировываются при изменении времени их подзадач")
+    public void epic_Reprioritized_WhenSubtaskTimeChanges() {
+        Epic epic1 = newEpicWithId(1, EPIC_NAME_1, EPIC_DESC_1);
+        Epic epic2 = newEpicWithId(2, EPIC_NAME_2, EPIC_DESC_2);
+        manager.addNewEpic(epic1);
+        manager.addNewEpic(epic2);
+
+        Subtask sub1 = newSubtaskWithId(3, SUBTASK_NAME_1, SUBTASK_DESC_1, TaskStatus.NEW, epic1.getId());
+        Subtask sub2 = newSubtaskWithId(4, SUBTASK_NAME_2, SUBTASK_DESC_2, TaskStatus.NEW, epic2.getId());
+
+        sub1.setStartTime(TASK_START_TIME_1);
+        sub1.setDuration(TASK_DURATION_1);
+        sub2.setStartTime(TASK_START_TIME_2);
+        sub2.setDuration(TASK_DURATION_2);
+
+        manager.addNewSubtask(sub1);
+        manager.addNewSubtask(sub2);
+
+        List<Task> before = manager.getPrioritizedTasks();
+        assertTrue(before.indexOf(epic1) < before.indexOf(epic2));
+
+        sub1.setStartTime(TASK_START_TIME_2.plusHours(3));
+        manager.updateSubtask(sub1);
+
+        List<Task> after = manager.getPrioritizedTasks();
+        assertTrue(after.indexOf(epic2) < after.indexOf(epic1));
+    }
+
+    @Test
+    @DisplayName("Приоритет: после изменения startTime не возникает дубликатов в списке приоритетов")
+    public void updateTask_NoDuplicatesInPrioritizedTasks() {
+        Task task = newTask(TASK_NAME_1, TASK_DESC_1, TaskStatus.NEW);
+        task.setStartTime(TASK_START_TIME_1);
+        task.setDuration(TASK_DURATION_1);
+        manager.addNewTask(task);
+
+        task.setStartTime(TASK_START_TIME_2);
+        manager.updateTask(task);
+
+        List<Task> prioritized = manager.getPrioritizedTasks();
+        assertEquals(1, prioritized.size());
+        assertEquals(task, prioritized.get(0));
+    }
+
 }
