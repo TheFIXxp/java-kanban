@@ -3,6 +3,7 @@ package ru.yandex.javacourse.schedule.http.handler;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.yandex.javacourse.schedule.http.GsonConstant;
+import ru.yandex.javacourse.schedule.http.StatusCode;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -11,41 +12,41 @@ import java.util.Optional;
 public abstract class BaseHttpHandler implements HttpHandler {
     public static final String JSON_MIME_TYPE = "application/json;charset=utf-8";
 
-    protected void sendResponse(HttpExchange exchange, int statusCode, String message) throws IOException {
+    protected void sendResponse(HttpExchange exchange, StatusCode statusCode, String message) throws IOException {
         byte[] resp = message.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", JSON_MIME_TYPE);
-        exchange.sendResponseHeaders(statusCode, resp.length);
+        exchange.sendResponseHeaders(statusCode.getCode(), resp.length);
         exchange.getResponseBody().write(resp);
         exchange.close();
     }
 
     protected void sendResponse(HttpExchange exchange, Object object) throws IOException {
         String json = GsonConstant.GSON.toJson(object);
-        sendResponse(exchange, 200, json);
+        sendResponse(exchange, StatusCode.OK, json);
     }
 
     protected void sendText(HttpExchange exchange, String message) throws IOException {
-        sendResponse(exchange, 200, message);
+        sendResponse(exchange, StatusCode.OK, message);
     }
 
     protected void sendCreated(HttpExchange exchange, String message) throws IOException {
-        sendResponse(exchange, 201, message);
+        sendResponse(exchange, StatusCode.CREATED, message);
     }
 
     protected void sendNotFound(HttpExchange exchange, String message) throws IOException {
-        sendResponse(exchange, 404, message);
+        sendResponse(exchange, StatusCode.NOT_FOUND, message);
     }
 
     protected void sendBadRequest(HttpExchange exchange, String message) throws IOException {
-        sendResponse(exchange, 400, message);
+        sendResponse(exchange, StatusCode.BAD_REQUEST, message);
     }
 
     protected void sendHasInteractions(HttpExchange exchange, String message) throws IOException {
-        sendResponse(exchange, 406, message);
+        sendResponse(exchange, StatusCode.NOT_ACCEPTABLE, message);
     }
 
     protected void sendMethodNotAllowed(HttpExchange exchange, String message) throws IOException {
-        sendResponse(exchange, 405, message);
+        sendResponse(exchange, StatusCode.METHOD_NOT_ALLOWED, message);
     }
 
     protected <T> T getBody(HttpExchange exchange, Class<T> clazz) throws IOException {
@@ -88,7 +89,7 @@ public abstract class BaseHttpHandler implements HttpHandler {
         } catch (IllegalArgumentException e) {
             sendHasInteractions(exchange, e.getMessage());
         } catch (Exception e) {
-            sendResponse(exchange, 500, "Internal Server Error");
+            sendResponse(exchange, StatusCode.INTERNAL_SERVER_ERROR, "Internal Server Error");
         }
     }
 
@@ -97,4 +98,6 @@ public abstract class BaseHttpHandler implements HttpHandler {
     public abstract void handlePost(HttpExchange exchange) throws IOException;
 
     public abstract void handleDelete(HttpExchange exchange) throws IOException;
+
+
 }

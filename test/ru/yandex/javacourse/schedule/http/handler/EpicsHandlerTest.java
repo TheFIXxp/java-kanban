@@ -2,6 +2,7 @@ package ru.yandex.javacourse.schedule.http.handler;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.yandex.javacourse.schedule.http.StatusCode;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
@@ -27,7 +28,8 @@ class EpicsHandlerTest extends HanderTest {
 
         HttpResponse<String> response = get(BASE_URL + "epics");
 
-        assertEquals(200, response.statusCode());
+        assertEquals(StatusCode.OK.getCode(), response.statusCode());
+
         List<Epic> epics = List.of(GSON.fromJson(response.body(), Epic[].class));
         assertEquals(2, epics.size());
         assertEquals(EPIC_NAME_1, epics.get(0).getName());
@@ -41,7 +43,8 @@ class EpicsHandlerTest extends HanderTest {
 
         HttpResponse<String> response = get(BASE_URL + "epics/" + epic.getId());
 
-        assertEquals(200, response.statusCode());
+        assertEquals(StatusCode.OK.getCode(), response.statusCode());
+
         Epic returned = GSON.fromJson(response.body(), Epic.class);
         assertEquals(epic.getId(), returned.getId());
         assertEquals(EPIC_NAME_1, returned.getName());
@@ -60,7 +63,8 @@ class EpicsHandlerTest extends HanderTest {
 
         HttpResponse<String> response = get(BASE_URL + "epics/" + epic.getId() + "/subtasks");
 
-        assertEquals(200, response.statusCode());
+        assertEquals(StatusCode.OK.getCode(), response.statusCode());
+
         List<Subtask> subtasks = List.of(GSON.fromJson(response.body(), Subtask[].class));
         assertEquals(2, subtasks.size());
         assertTrue(subtasks.stream().anyMatch(s -> s.getName().equals(SUBTASK_NAME_1)));
@@ -70,7 +74,8 @@ class EpicsHandlerTest extends HanderTest {
     @DisplayName("GET /epics/{id} — несуществующий ID возвращает 404")
     void getEpicById_NotFound() {
         HttpResponse<String> response = get(BASE_URL + "epics/999");
-        assertEquals(404, response.statusCode());
+        assertEquals(StatusCode.NOT_FOUND.getCode(), response.statusCode());
+
     }
 
     @Test
@@ -81,7 +86,8 @@ class EpicsHandlerTest extends HanderTest {
 
         HttpResponse<String> response = post(BASE_URL + "epics", json);
 
-        assertEquals(201, response.statusCode());
+        assertEquals(StatusCode.CREATED.getCode(), response.statusCode());
+
         assertEquals(1, manager.getEpics().size());
     }
 
@@ -98,7 +104,8 @@ class EpicsHandlerTest extends HanderTest {
 
         HttpResponse<String> response = delete(BASE_URL + "epics/" + epic.getId());
 
-        assertEquals(200, response.statusCode());
+        assertEquals(StatusCode.OK.getCode(), response.statusCode());
+
         assertTrue(manager.getEpics().isEmpty());
         assertTrue(manager.getSubtasks().isEmpty());
     }
@@ -107,7 +114,8 @@ class EpicsHandlerTest extends HanderTest {
     @DisplayName("DELETE /epics — без ID возвращает 400")
     void deleteWithoutId_Returns400() {
         HttpResponse<String> response = delete(BASE_URL + "epics");
-        assertEquals(400, response.statusCode());
+        assertEquals(StatusCode.BAD_REQUEST.getCode(), response.statusCode());
+
     }
 
 

@@ -2,6 +2,7 @@ package ru.yandex.javacourse.schedule.http.handler;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.yandex.javacourse.schedule.http.StatusCode;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
@@ -30,7 +31,8 @@ class SubtasksHandlerTest extends HanderTest {
 
         HttpResponse<String> response = get(BASE_URL + "subtasks");
 
-        assertEquals(200, response.statusCode());
+        assertEquals(StatusCode.OK.getCode(), response.statusCode());
+
 
         List<Subtask> subtasks = List.of(GSON.fromJson(response.body(), Subtask[].class));
         assertEquals(2, subtasks.size());
@@ -48,7 +50,8 @@ class SubtasksHandlerTest extends HanderTest {
 
         HttpResponse<String> response = get(BASE_URL + "subtasks/" + subtask.getId());
 
-        assertEquals(200, response.statusCode());
+        assertEquals(StatusCode.OK.getCode(), response.statusCode());
+
 
         Subtask returned = GSON.fromJson(response.body(), Subtask.class);
         assertEquals(subtask.getId(), returned.getId());
@@ -60,7 +63,8 @@ class SubtasksHandlerTest extends HanderTest {
     void getSubtaskById_NotFound() {
         HttpResponse<String> response = get(BASE_URL + "subtasks/999");
 
-        assertEquals(404, response.statusCode());
+        assertEquals(StatusCode.NOT_FOUND.getCode(), response.statusCode());
+
     }
 
     @Test
@@ -74,7 +78,8 @@ class SubtasksHandlerTest extends HanderTest {
 
         HttpResponse<String> response = post(BASE_URL + "subtasks", json);
 
-        assertEquals(201, response.statusCode());
+        assertEquals(StatusCode.CREATED.getCode(), response.statusCode());
+
         assertEquals(1, manager.getSubtasks().size());
     }
 
@@ -92,7 +97,8 @@ class SubtasksHandlerTest extends HanderTest {
 
         HttpResponse<String> response = post(BASE_URL + "subtasks/" + subtask.getId(), json);
 
-        assertEquals(201, response.statusCode());
+        assertEquals(StatusCode.CREATED.getCode(), response.statusCode());
+
         assertEquals(SUBTASK_NAME_2, manager.getSubtask(subtask.getId()).getName());
     }
 
@@ -107,7 +113,8 @@ class SubtasksHandlerTest extends HanderTest {
 
         HttpResponse<String> response = delete(BASE_URL + "subtasks/" + subtask.getId());
 
-        assertEquals(200, response.statusCode());
+        assertEquals(StatusCode.OK.getCode(), response.statusCode());
+
         assertTrue(manager.getSubtasks().isEmpty());
     }
 
@@ -116,7 +123,8 @@ class SubtasksHandlerTest extends HanderTest {
     void deleteWithoutId_Returns400() {
         HttpResponse<String> response = delete(BASE_URL + "subtasks");
 
-        assertEquals(400, response.statusCode());
+        assertEquals(StatusCode.BAD_REQUEST.getCode(), response.statusCode());
+
     }
 }
 

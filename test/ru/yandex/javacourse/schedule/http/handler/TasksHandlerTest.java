@@ -2,6 +2,7 @@ package ru.yandex.javacourse.schedule.http.handler;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.yandex.javacourse.schedule.http.StatusCode;
 import ru.yandex.javacourse.schedule.tasks.Task;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
@@ -25,7 +26,8 @@ class TasksHandlerTest extends HanderTest {
 
         HttpResponse<String> response = get(BASE_URL + "tasks");
 
-        assertEquals(200, response.statusCode());
+        assertEquals(StatusCode.OK.getCode(), response.statusCode());
+
 
         List<Task> tasks = List.of(GSON.fromJson(response.body(), Task[].class));
         assertEquals(2, tasks.size());
@@ -40,7 +42,8 @@ class TasksHandlerTest extends HanderTest {
 
         HttpResponse<String> response = get(BASE_URL + "tasks/" + task.getId());
 
-        assertEquals(200, response.statusCode());
+        assertEquals(StatusCode.OK.getCode(), response.statusCode());
+
 
         Task returned = GSON.fromJson(response.body(), Task.class);
         assertEquals(task.getId(), returned.getId());
@@ -52,7 +55,8 @@ class TasksHandlerTest extends HanderTest {
     void getTaskById_NotFound() {
         HttpResponse<String> response = get(BASE_URL + "tasks/999");
 
-        assertEquals(404, response.statusCode());
+        assertEquals(StatusCode.NOT_FOUND.getCode(), response.statusCode());
+
     }
 
     @Test
@@ -63,7 +67,8 @@ class TasksHandlerTest extends HanderTest {
 
         HttpResponse<String> response = post(BASE_URL + "tasks", json);
 
-        assertEquals(201, response.statusCode());
+        assertEquals(StatusCode.CREATED.getCode(), response.statusCode());
+
         assertEquals(1, manager.getTasks().size());
     }
 
@@ -78,7 +83,8 @@ class TasksHandlerTest extends HanderTest {
 
         HttpResponse<String> response = post(BASE_URL + "tasks/" + task.getId(), json);
 
-        assertEquals(201, response.statusCode());
+        assertEquals(StatusCode.CREATED.getCode(), response.statusCode());
+
         assertEquals(TASK_NAME_2, manager.getTask(task.getId()).getName());
     }
 
@@ -90,7 +96,8 @@ class TasksHandlerTest extends HanderTest {
 
         HttpResponse<String> response = delete(BASE_URL + "tasks/" + task.getId());
 
-        assertEquals(200, response.statusCode());
+        assertEquals(StatusCode.OK.getCode(), response.statusCode());
+
         assertTrue(manager.getTasks().isEmpty());
     }
 
@@ -99,7 +106,8 @@ class TasksHandlerTest extends HanderTest {
     void deleteWithoutId_Returns400() {
         HttpResponse<String> response = delete(BASE_URL + "tasks");
 
-        assertEquals(400, response.statusCode());
+        assertEquals(StatusCode.BAD_REQUEST.getCode(), response.statusCode());
+
     }
 
 
@@ -118,7 +126,8 @@ class TasksHandlerTest extends HanderTest {
         String json = GSON.toJson(t2);
         HttpResponse<String> response = post(BASE_URL + "tasks", json);
 
-        assertEquals(406, response.statusCode());
+        assertEquals(StatusCode.NOT_ACCEPTABLE.getCode(), response.statusCode());
+
         assertEquals(1, manager.getTasks().size());
     }
 }
